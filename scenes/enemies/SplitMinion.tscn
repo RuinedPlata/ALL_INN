@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/SplitMinion.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/enemies/ignel/IgnelAnimations.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/enemies/ignel/IgnelShadowAnimations.tres" id="3"]
+
+[sub_resource type="CircleShape2D" id="CollisionShape"]
+radius = 9.0
+
+[node name="SplitMinion" type="CharacterBody2D"]
+process_mode = 1
+collision_layer = 2
+collision_mask = 16
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CollisionShape")
+
+[node name="MiniIgnelShadow" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 7)
+z_index = -1
+scale = Vector2(0.57, 0.57)
+sprite_frames = ExtResource("3")
+animation = &"shadow"
+texture_filter = 1
+
+[node name="MiniIgnelSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -3)
+scale = Vector2(0.57, 0.57)
+sprite_frames = ExtResource("2")
+animation = &"hover"
+texture_filter = 1

@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/DroppedItem.gd" id="1"]
+
+[node name="DroppedItem" type="Node2D"]
+process_mode = 1
+z_index = 1
+script = ExtResource("1")
+
+[node name="Glow" type="Sprite2D" parent="."]
+texture_filter = 1
+
+[node name="Chip" type="Sprite2D" parent="."]
+position = Vector2(0, -5)
+texture_filter = 1
+hframes = 6

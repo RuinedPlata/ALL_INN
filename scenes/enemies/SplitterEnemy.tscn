@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/SplitterEnemy.gd" id="1"]
+[ext_resource type="SpriteFrames" path="res://assets/enemies/incubator/IncubatorAnimations.tres" id="2"]
+[ext_resource type="SpriteFrames" path="res://assets/enemies/incubator/IncubatorShadowAnimations.tres" id="3"]
+
+[sub_resource type="CircleShape2D" id="CollisionShape"]
+radius = 15.0
+
+[node name="SplitterEnemy" type="CharacterBody2D"]
+process_mode = 1
+collision_layer = 2
+collision_mask = 16
+script = ExtResource("1")
+disengage_after_contact = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CollisionShape")
+
+[node name="IncubatorShadow" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 11)
+z_index = -1
+sprite_frames = ExtResource("3")
+animation = &"shadow"
+texture_filter = 1
+
+[node name="IncubatorSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -5)
+sprite_frames = ExtResource("2")
+animation = &"hover"
+texture_filter = 1
