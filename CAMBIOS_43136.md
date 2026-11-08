@@ -10,4 +10,4 @@
 
 - Pistola, escopeta y Desert Eagle sin cambios.
 - Lógica de brújula, laboratorio de armas, hitboxes, daño, proyectiles, economía y menús sin cambios.
-- Base funcional directa: 4.31.35.
+- Base no se 12
