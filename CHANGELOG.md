@@ -1,5 +1,30 @@
 # ALL IN — Historial consolidado de cambios
 
+## 4.31.38 — Ficha Infernal: fondo animado y módulo reutilizable
+
+- Convertido el prototipo GIF aprobado en un suelo PNG único de 180×320 más seis capas de bombillas transparentes. Se comprueba recomposición exacta de los seis frames.
+- Nuevo `scripts/visual/RoomBackdrop.gd`: dos Sprite2D sin colisión, `z_index=-50`, filtrado nearest, animación de luces a 5,55 FPS mediante cambio de textura, pausables y reutilizados.
+- Nuevo `scripts/visual/RoomThemeCatalog.gd`: punto único para añadir futuros escenarios y elegir su reparto por sala. Para esta prueba usa Ficha Infernal en todas las salas.
+- `Main.gd` crea el nodo de fondo, aplica el tema al comenzar la sala y evita taparlo con el suelo clásico. Se conservan indicador de jefe y portal, colisiones y generación de obstáculos.
+- Sin cambios a armas, protagonista, enemigos, proyectiles, interfaces, economía o balance.
+- Validaciones estáticas, comparación con 4.31.37, recursos y ZIP autocontenido; pruebas en Godot pendientes de ejecución por el usuario.
+
+## 4.31.37 — Desert Eagle pixel art + brújula flotante
+
+- Se sustituyeron los cuatro atlas de Desert Eagle por los diseños aprobados: cuerpo robusto, cañón largo, mira tipo aleta y progresión de corrupción con borde blanco.
+- Los cuatro atlas mantienen 8 celdas de 48×48 y las direcciones 0↓ 1↙ 2← 3↖ 4↑ 5↗ 6→ 7↘.
+- `Player.gd` ahora incorpora una rama **exclusivamente visual** para la Deagle: brújula de seguimiento amortiguado, tamaño al 84 %, límites de arena y reseteo al revivir.
+- No se modificaron pistola, escopeta ni subfusil, ni su sistema de brújula aprobado.
+- Laboratorio de armas, colisiones, daño, cadencia, proyectiles, economía y enemigos conservados.
+- Paquete autocontenido con una única carpeta raíz.
+
+## 4.31.37 — Desert Eagle: nueva spritesheet (4 rarezas)
+
+- Sustituidos únicamente los cuatro PNG de Desert Eagle por celdas RGBA transparentes de 48×48, ocho vistas bien ordenadas por rareza y contorno blanco.
+- Diseño robusto de cañón largo y mira tipo aleta, evolución normal → corrupción rara → épica → dorada legendaria.
+- Sin cambios en scripts, escenas, hitboxes, sistema de apuntado o comportamiento visual existente de Deagle (todavía no usa brújula flotante).
+- Base conservada: 4.31.36 con pistola, escopeta y Uzi aprobadas.
+
 ## 4.31.36 — Subfusil más pequeño y con borde blanco
 
 - Ajustados exclusivamente los cuatro atlas del subfusil (`smg_common`, `smg_rare`, `smg_epic`, `smg_legendary`).

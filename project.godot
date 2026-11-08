@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="ALL IN - Etapa 4.31.36 (Subfusil tamaño/borde)"
+config/name="ALL IN - Etapa 4.31.38 (Ficha Infernal - Fondo animado)"
 run/main_scene="res://scenes/main/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 

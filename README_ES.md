@@ -1,3 +1,62 @@
+# ALL IN — Etapa 4.31.38 | Ficha Infernal, primer escenario funcional
+
+**Base estable:** 4.31.37 (cuatro armas brújula aprobadas). Proyecto Godot completo para PC y Android.
+**Estado de prueba:** assets, scripts, referencias y ZIP auditados estáticamente; Godot no disponible en este entorno.
+
+## ¿Qué cambió?
+
+- Ficha Infernal es ahora el **suelo de todas las salas para esta prueba**: temática roja, amarillo/dorado y ficha con pentagrama tenue.
+- El GIF visual aprobado fue separado **sin alterar los píxeles** en un PNG de suelo estático y seis PNG de luces con transparencia. 180×320 px, escalados con filtro nearest al viewport vertical 540×960.
+- Las luces de los bordes se animan a **5,55 cuadros por segundo**, sin Light2D, partículas, shaders ni física.
+- `RoomBackdrop` usa **z_index -50**; el protagonista, enemigos, proyectiles, obstáculos y CanvasLayer HUD siguen arriba.
+- `RoomThemeCatalog.gd` permite registrar escenarios futuros sin alterar `Main.gd` ni la lógica de combate. No se han añadido nuevos escenarios ni mecánicas.
+- Los elementos de suelo son **completamente decorativos y transitables**; los muros y obstáculos procedurales siguen siendo cuerpos con colisión independientes.
+- El fondo y las luces se reutilizan de sala en sala. Al pausar, el procesamiento de luces se detiene automáticamente.
+
+## Prueba recomendada en Godot
+
+1. Extraer el ZIP: contiene **una sola carpeta raíz** con `project.godot`.
+2. Importar el proyecto en Godot. El nombre visible contiene **Etapa 4.31.38**.
+3. Abrir una partida, observar la ficha central y los bordes amarillos/rojos mientras se mueven el Apostador y sus enemigos.
+4. Abrir y cerrar PAUSA: las luces deben congelarse y continuar; el HUD y los menús no deben quedar tapados.
+5. Acercarse a paredes y obstáculos: deben bloquear igual que antes, pero el dibujo de ficha central no bloquea.
+6. Avanzar tres salas y una de jefe: los decorados se mantienen de fondo, sin cambiar el camino o los ataques.
+7. Probar en Android: revisar claridad del combate y fluidez, incluso tras varias salas.
+
+## Añadir nuevos fondos en el futuro
+
+- Crear `assets/rooms/<id>/floor.png` y `lights_00.png` ... (`180×320` con transparencia para luces).
+- Añadir sus `preload()` y entrada a `scripts/visual/RoomThemeCatalog.gd`.
+- Definir la asignación por salas en `theme_for_room()` dentro del mismo catálogo.
+- **No modificar** `RoomBackdrop.gd`, escenas, navegación, colisiones, armas ni HUD.
+- Se puede desactivar el movimiento ambiental con `room_backdrop.set_ambient_animation_enabled(false)` cuando decidamos incorporarlo a ajustes gráficos.
+
+---
+
+# ALL IN — Etapa 4.31.37 | Desert Eagle brújula: cuatro rarezas y ocho direcciones
+
+**Proyecto Godot completo para PC y Android.** Esta entrega parte de la 4.31.36 aprobada.
+**Estado:** recursos e integridad de archivos verificados; ejecución en Godot pendiente de tu prueba.
+
+## Cambios de 4.31.37
+
+- Se reemplazaron **exclusivamente** los cuatro atlas de la Desert Eagle (`deagle_common`, `deagle_rare`, `deagle_epic`, `deagle_legendary`) por la última hoja de pixel art autorizada.
+- El nuevo diseño destaca cañón más largo, estructura robusta, mira tipo aleta de tiburón, detalles en el cañón, progresión de corrupción por rareza y contorno blanco.
+- Las texturas mantienen las celdas existentes de **48 × 48 px**, con ocho vistas en el orden del código: **0 ↓, 1 ↙, 2 ←, 3 ↖, 4 ↑, 5 ↗, 6 →, 7 ↘**.
+- Correspondencia desde la hoja original (↑ ↗ → ↘ ↓ ↙ ← ↖): columnas **5, 6, 7, 8, 1, 2, 3, 4**. No se alteraron las direcciones de apuntado en el código.
+- **Se modificó únicamente la presentación visual de la Deagle en `Player.gd`**, siguiendo tu autorización: brújula flotante con ocho vistas discretas, órbita suave, escala proporcional, límite de arena y reinicio tras reanimar; sin cambios de gameplay ni hitboxes.
+- Pistola, escopeta, Uzi, laboratorio de armas, colisiones, ataques, daño y balance permanecen intactos.
+
+## Prueba recomendada en Godot
+
+1. Importa `project.godot` desde la carpeta extraída en Godot 4.
+2. Abre una partida y entra en **Pausa → LABORATORIO DE ARMAS**.
+3. Equipa Desert Eagle en común, rara, épica y legendaria una por una.
+4. Comprueba que la Deagle siga flotando al apuntar en las ocho direcciones, y revisa especialmente las vistas cardinales y diagonales: cañón en dirección **↙ (1)** y **↘ (7)**; mira hacia **↑ (4)** y **↓ (0)**.
+5. Comprueba que la pistola, escopeta y Uzi aprobadas siguen sin cambios.
+
+## Historial anterior
+
 # ALL IN — Etapa 4.31.36 | Subfusil más pequeño + borde blanco
 
 Proyecto **Godot completo** para PC y Android, en una única carpeta de importación.

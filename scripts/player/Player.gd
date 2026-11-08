@@ -33,6 +33,12 @@ const SHOTGUN_ORBIT_RADIUS_Y: float = 30.0
 # 4.31.35: subfusil flotante; conserva independientes la pistola y escopeta.
 const SMG_ORBIT_RADIUS_X: float = 33.0
 const SMG_ORBIT_RADIUS_Y: float = 31.0
+# 4.31.37: Desert Eagle flotante, solo presentación visual.
+# Su atlas 48x48 se reduce ligeramente para mantenerse proporcionado.
+const DEAGLE_ORBIT_RADIUS_X: float = 34.0
+const DEAGLE_ORBIT_RADIUS_Y: float = 31.0
+const DEAGLE_VISUAL_SCALE: Vector2 = Vector2(0.84, 0.84)
+const DEAGLE_ARENA_MARGIN: float = 22.0  # 48 * 0.84 / 2 + margen
 # PISTOLA BRÚJULA 4.31.30: posición flotante independiente de las manos.
 # Offset ligado a visual_direction (apuntado real), no a la caminata.
 # La textura usa ocho ángulos discretos: evita rotar/alisar píxeles.
@@ -98,6 +104,8 @@ var _shotgun_orbit_position: Vector2 = Vector2.ZERO
 var _shotgun_orbit_initialized: bool = false
 var _smg_orbit_position: Vector2 = Vector2.ZERO
 var _smg_orbit_initialized: bool = false
+var _deagle_orbit_position: Vector2 = Vector2.ZERO
+var _deagle_orbit_initialized: bool = false
 var visual_direction: Vector2 = Vector2.DOWN
 var visual_target_time: float = 0.0
 var hurt_iframe_duration: float = 1.25
@@ -244,7 +252,7 @@ static func weapon_pellet_count(weapon_type: String) -> int:
 
 static func weapon_damage_factor(weapon_type: String) -> float:
     match weapon_type:
-        "shotgun": return 0.52
+        "shotgun": return 1.5
         "smg": return 0.82 # 4.31: +12.3% daño por proyectil; no altera cadencia
         "deagle": return 1.30
         _: return 1.0
@@ -359,8 +367,9 @@ func _update_weapon_sprite(delta: float) -> void:
     var is_pistol: bool = key.begins_with("pistol_")
     var is_shotgun: bool = key.begins_with("shotgun_")
     var is_smg: bool = key.begins_with("smg_")
-    # Las tres armas brújula siguen el apuntado real, no el sentido de caminar.
-    var direction_index: int = _body_direction_index(visual_direction) if (is_pistol or is_shotgun or is_smg) else _current_visual_direction_index(is_walking)
+    var is_deagle: bool = key.begins_with("deagle_")
+    # Las cuatro armas brújula siguen el apuntado real, no el sentido de caminar.
+    var direction_index: int = _body_direction_index(visual_direction) if (is_pistol or is_shotgun or is_smg or is_deagle) else _current_visual_direction_index(is_walking)
     var desired_texture: Texture2D = _get_weapon_texture(key)
     if weapon_sprite.texture != desired_texture:
         weapon_sprite.texture = desired_texture
@@ -371,6 +380,8 @@ func _update_weapon_sprite(delta: float) -> void:
     var desired_position: Vector2
     if not is_smg:
         _smg_orbit_initialized = false
+    if not is_deagle:
+        _deagle_orbit_initialized = false
     if is_pistol:
         # La brújula sí se mueve en 360° en el espacio, pero la ilustración
         # cambia únicamente entre ocho sprites. Nunca rotamos la textura.
@@ -437,13 +448,35 @@ func _update_weapon_sprite(delta: float) -> void:
         var smg_global_weapon_position: Vector2 = (global_position + smg_floating_position).clamp(smg_arena.position + smg_inset, smg_arena.end - smg_inset)
         var smg_snapped_world: Vector2 = Vector2(roundf(smg_global_weapon_position.x), roundf(smg_global_weapon_position.y))
         desired_position = smg_snapped_world - global_position
+    elif is_deagle:
+        # Desert Eagle: mismo concepto que escopeta/Uzi, sin afectar las ramas aprobadas.
+        _pistol_orbit_initialized = false
+        _shotgun_orbit_initialized = false
+        _smg_orbit_initialized = false
+        var deagle_aim: Vector2 = visual_direction.normalized() if visual_direction.length_squared() > 0.001 else Vector2.DOWN
+        var deagle_orbit_target: Vector2 = PISTOL_ORBIT_CENTER + Vector2(deagle_aim.x * DEAGLE_ORBIT_RADIUS_X, deagle_aim.y * DEAGLE_ORBIT_RADIUS_Y)
+        if not _deagle_orbit_initialized:
+            _deagle_orbit_position = deagle_orbit_target
+            _deagle_orbit_initialized = true
+        else:
+            var deagle_follow_weight: float = clampf(1.0 - exp(-PISTOL_ORBIT_FOLLOW * delta), 0.0, 1.0)
+            _deagle_orbit_position = _deagle_orbit_position.lerp(deagle_orbit_target, deagle_follow_weight)
+        var deagle_floating_position: Vector2 = _deagle_orbit_position + Vector2(0.0, sin(sprite_elapsed * PISTOL_FLOAT_SPEED) * PISTOL_FLOAT_AMPLITUDE)
+        # Considerar la escala y el atlas de 48px para no salir de la arena.
+        var deagle_arena: Rect2 = RunManager.arena_rect
+        var deagle_inset: Vector2 = Vector2(DEAGLE_ARENA_MARGIN, DEAGLE_ARENA_MARGIN)
+        var deagle_global_weapon_position: Vector2 = (global_position + deagle_floating_position).clamp(deagle_arena.position + deagle_inset, deagle_arena.end - deagle_inset)
+        var deagle_snapped_world: Vector2 = Vector2(roundf(deagle_global_weapon_position.x), roundf(deagle_global_weapon_position.y))
+        desired_position = deagle_snapped_world - global_position
     else:
         _pistol_orbit_initialized = false
         _shotgun_orbit_initialized = false
+        _smg_orbit_initialized = false
+        _deagle_orbit_initialized = false
         desired_position = WEAPON_OFFSETS[direction_index]
     if weapon_sprite.position != desired_position:
         weapon_sprite.position = desired_position
-    var desired_scale: Vector2 = Vector2.ONE if (is_pistol or is_shotgun or is_smg) else WEAPON_SCALE
+    var desired_scale: Vector2 = DEAGLE_VISUAL_SCALE if is_deagle else (Vector2.ONE if (is_pistol or is_shotgun or is_smg) else WEAPON_SCALE)
     if weapon_sprite.scale != desired_scale:
         weapon_sprite.scale = desired_scale
     var desired_z: int = -1 if WEAPON_BEHIND_DIRECTIONS.has(direction_index) else 1
@@ -546,6 +579,7 @@ func reset_death_cinematic() -> void:
     _pistol_orbit_initialized = false
     _shotgun_orbit_initialized = false
     _smg_orbit_initialized = false
+    _deagle_orbit_initialized = false
     body_sprite.texture = BODY_ATLAS
     body_sprite.offset = Vector2(0.0, -7.0)
     body_sprite.modulate = Color.WHITE

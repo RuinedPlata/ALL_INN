@@ -7,6 +7,8 @@ const DROP_SCENE: PackedScene = preload("res://scenes/items/DroppedItem.tscn")
 const DB = preload("res://scripts/systems/ItemDatabase.gd")
 const OBSTACLE_SCRIPT = preload("res://scripts/levels/Obstacle.gd")
 const ROOM_GENERATOR_SCRIPT = preload("res://scripts/levels/RoomGenerator.gd")
+const ROOM_BACKDROP_SCRIPT = preload("res://scripts/visual/RoomBackdrop.gd")
+const ROOM_THEME_CATALOG = preload("res://scripts/visual/RoomThemeCatalog.gd")
 # Recursos visuales del HUD (no afectan colisiones, salud ni daño).
 const HUD_HEART_FULL = preload("res://assets/hud/normal_full.png")
 const HUD_HEART_EMPTY = preload("res://assets/hud/normal_empty.png")
@@ -30,6 +32,7 @@ var enemies_root: Node2D
 var obstacles_root: Node2D
 var room_navigation
 var room_generator
+var room_backdrop
 var level_manager
 var room_label: Label
 var next_panel: PanelContainer
@@ -212,6 +215,10 @@ func _create_world() -> void:
     # recortar el mundo; paredes físicas fuera de los límites visibles.
     var viewport: Vector2 = get_viewport_rect().size
     RunManager.arena_rect = Rect2(Vector2.ZERO, viewport)
+    # 4.31.38: capa puramente visual, SIEMPRE detrás del combate.
+    room_backdrop = ROOM_BACKDROP_SCRIPT.new()
+    room_backdrop.name = "RoomBackdrop"
+    add_child(room_backdrop)
     _build_arena_walls()
     obstacles_root = Node2D.new()
     obstacles_root.name = "Obstacles"
@@ -1197,6 +1204,9 @@ func _create_death_roll_menu(hud: CanvasLayer) -> void:
     layout.add_child(death_roll_button)
 
 func _begin_room(number: int) -> void:
+    # Fondo independiente: cambiar de sala no toca navegación, colisiones ni IA.
+    var theme: Dictionary = ROOM_THEME_CATALOG.theme_for_room(number)
+    room_backdrop.configure(theme, RunManager.arena_rect)
     # Los objetos, monedas y maldiciones persisten ENTRE salas.
     # No hay curación automática: descansar es una decisión de riesgo.
     _close_menus(true)
@@ -2339,18 +2349,21 @@ func _restart_run() -> void:
     get_tree().call_deferred("reload_current_scene")
 
 func _draw() -> void:
-    var viewport_size := get_viewport_rect().size
-    var full := Rect2(Vector2.ZERO, viewport_size)
-    draw_rect(full, Color("#15161e"), true)
     var arena: Rect2 = RunManager.arena_rect
-    var palettes := [Color("#25212b"), Color("#252832"), Color("#302532"), Color("#26302d")]
-    var floor_color: Color = palettes[int((RunManager.current_level - 1) / 3) % palettes.size()]
-    draw_rect(arena, floor_color, true)
-    for x in range(int(arena.position.x + 25), int(arena.end.x - 20), 43):
-        for y in range(int(arena.position.y + 25), int(arena.end.y - 20), 43):
-            draw_circle(Vector2(x, y), 1.2, Color("#41404a"))
-    # Borde visual coincide con las paredes físicas.
-    draw_rect(arena, Color("#867c94"), false, 3.0)
+    # El fondo animado se dibuja en RoomBackdrop (z = -50); NUNCA por encima
+    # de enemigos, proyectiles, obstáculos o HUD. El fallback clásico queda.
+    if room_backdrop == null or not room_backdrop.has_active_theme():
+        var viewport_size := get_viewport_rect().size
+        var full := Rect2(Vector2.ZERO, viewport_size)
+        draw_rect(full, Color("#15161e"), true)
+        var palettes := [Color("#25212b"), Color("#252832"), Color("#302532"), Color("#26302d")]
+        var floor_color: Color = palettes[int((RunManager.current_level - 1) / 3) % palettes.size()]
+        draw_rect(arena, floor_color, true)
+        for x in range(int(arena.position.x + 25), int(arena.end.x - 20), 43):
+            for y in range(int(arena.position.y + 25), int(arena.end.y - 20), 43):
+                draw_circle(Vector2(x, y), 1.2, Color("#41404a"))
+        # Borde visual clásico coincide con las paredes físicas.
+        draw_rect(arena, Color("#867c94"), false, 3.0)
     if RunManager.current_level % 10 == 0:
         draw_arc(arena.get_center(), 100, 0.0, TAU, 64, Color("#a978b8"), 2)
     if portal_ready and room_choice_made:
